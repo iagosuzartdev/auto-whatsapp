@@ -12,7 +12,6 @@ CREATE TABLE "Lead" (
 -- CreateTable
 CREATE TABLE "Schedule" (
     "id" SERIAL NOT NULL,
-    "phone" TEXT NOT NULL,
     "text" TEXT NOT NULL,
     "sendAt" TIMESTAMP(3) NOT NULL,
     "sent" BOOLEAN NOT NULL DEFAULT false,
