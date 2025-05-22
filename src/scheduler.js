@@ -5,9 +5,8 @@ const prisma = new PrismaClient();
 
 console.log("[CRON] Agendador iniciado!");
 
-// Executa a cada minuto
 const job = new CronJob(
-  "* * * * *",
+  "*/15 * * * *",
   async () => {
     console.log("[CRON] Verificando agendamentos...");
 
