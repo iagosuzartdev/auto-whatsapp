@@ -20,7 +20,7 @@ function normalizePhone(raw) {
  * @param {number} ms
  */
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -28,9 +28,9 @@ function sleep(ms) {
  * @param {string} phone
  * @param {number} durationMs
  */
-async function simulateTyping(phone, durationMs = 4000) {
+async function simulateTyping(phone, durationMs = 3000) {
   const formatted = normalizePhone(phone);
-  // enviando estado de digitação
+
   try {
     await axios.post(
       `${BASE_URL}/send-state`,
@@ -38,14 +38,16 @@ async function simulateTyping(phone, durationMs = 4000) {
       { headers: { "Client-Token": CLIENT_TOKEN } }
     );
   } catch (err) {
-    console.error("Erro ao iniciar digitação:", err.response?.data || err.message);
+    console.error(
+      "Erro ao iniciar digitação:",
+      err.response?.data || err.message
+    );
   }
-  // aguarda o tempo de digitação
   await sleep(durationMs);
 }
 
 /**
- * Envia texto após simular digitação de ~4s e espera mais 3s após envio.
+ * Envia texto após simular digitação de ~3s e espera mais 2s após envio.
  * @param {string} phone
  * @param {string} message
  */
@@ -54,7 +56,7 @@ async function sendText(phone, message) {
     throw new Error("Telefone e mensagem são obrigatórios.");
   }
   // simula digitação
-  await simulateTyping(phone, 4000);
+  await simulateTyping(phone, 3000);
 
   const formatted = normalizePhone(phone);
   try {
@@ -63,11 +65,14 @@ async function sendText(phone, message) {
       { phone: formatted, message },
       { headers: { "Client-Token": CLIENT_TOKEN } }
     );
-    // aguarda 3s antes de permitir próxima mensagem
-    await sleep(2000);
+    // aguarda 1s antes de permitir próxima mensagem
+    await sleep(1000);
     return response.data;
   } catch (err) {
-    console.error("Erro ao enviar mensagem:", err.response?.data || err.message);
+    console.error(
+      "Erro ao enviar mensagem:",
+      err.response?.data || err.message
+    );
   }
 }
 
@@ -81,7 +86,7 @@ async function sendDocument(phone, documentUrl, fileName) {
   if (!phone || !documentUrl || !fileName) {
     throw new Error("Telefone, URL do documento e fileName são obrigatórios.");
   }
-  // simula digitação breve (pode ser menor que texto, ex: 2s)
+  
   await simulateTyping(phone, 2000);
 
   const formatted = normalizePhone(phone);
@@ -91,11 +96,14 @@ async function sendDocument(phone, documentUrl, fileName) {
       { phone: formatted, document: documentUrl, fileName },
       { headers: { "Client-Token": CLIENT_TOKEN } }
     );
-    // aguarda 3s antes de próxima ação
-    await sleep(3000);
+    
+    await sleep(1000);
     return response.data;
   } catch (err) {
-    console.error("Erro ao enviar documento:", err.response?.data || err.message);
+    console.error(
+      "Erro ao enviar documento:",
+      err.response?.data || err.message
+    );
   }
 }
 

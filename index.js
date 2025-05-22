@@ -33,44 +33,46 @@ app.post("/api/lead", async (req, res) => {
     });
   }
 
-  // Normaliza o telefone usando a função compartilhada
   const formatted = normalizePhone(rawPhone);
 
-  // Persiste o lead no banco de dados
   const newLead = await prisma.lead.upsert({
     where: { phone: formatted },
     update: { name, email },
     create: { name, email, phone: formatted },
   });
 
-  // Dispara mensagem de agradecimento
-  await sendText(
-    formatted,
-    `Olá ${newLead.name}! Obrigado pelo cadastro. Já já te envio o material no WhatsApp 😉`
-  );
+  res.status(201).json({ success: true, lead: newLead });
 
-  // Envia o material em PDF
-  await sendDocument(
-    formatted,
-    "https://drive.google.com/uc?export=download&id=1vx7pkBN3ml-UkQNH_sZirP9lSXzGubjZ",
-    "material.pdf"
-  );
+  (async () => {
+    try {
+      await sendText(
+        formatted,
+        `Olá ${newLead.name}! Obrigado pelo cadastro. Já já te envio o material no WhatsApp 😉`
+      );
 
-  // Agenda os lembretes: 7, 3 e 1 dia antes do lançamento
-  const daysArray = [7, 3, 1];
-  for (const days of daysArray) {
-    const sendAt = new Date(LAUNCH_DATE);
-    sendAt.setDate(sendAt.getDate() - days);
-    await prisma.schedule.create({
-      data: {
-        text: `Faltam ${days} dias para o lançamento!`,
-        sendAt,
-        leadId: newLead.id,
-      },
-    });
-  }
+      await sendDocument(
+        formatted,
+        "https://drive.google.com/uc?export=download&id=1vx7pkBN3ml-UkQNH_sZirP9lSXzGubjZ",
+        "material.pdf"
+      );
 
-  return res.status(201).json({ success: true, lead: newLead });
+      const daysArray = [7, 3, 1];
+      for (const days of daysArray) {
+        const sendAt = new Date(LAUNCH_DATE);
+        sendAt.setDate(sendAt.getDate() - days);
+        await prisma.schedule.create({
+          data: {
+            text: `Faltam ${days} dias para o lançamento!`,
+            sendAt,
+            leadId: newLead.id,
+          },
+        });
+      }
+      console.log("[LEAD] Processo assíncrono concluído para:", formatted);
+    } catch (err) {
+      console.error("[LEAD] Erro no processo assíncrono:", err);
+    }
+  })();
 });
 
 app.listen(3000, () => console.log("Servidor rodando na porta 3000"));
