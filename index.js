@@ -11,6 +11,17 @@ app.use(express.urlencoded({ extended: true }));
 
 const LAUNCH_DATE = new Date(process.env.LAUNCH_DATE);
 
+app.post("/webhook", (req, res) => {
+  const token = req.headers["x-api-key"];
+  if (token !== process.env.WEBHOOK_SECRET) {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  console.log("[WEBHOOK] Payload recebido:", req.body);
+
+  res.status(200).json({ ok: true });
+});
+
 app.post("/api/lead", async (req, res) => {
   console.log(">>> req.body:", req.body);
   const { name, email, phone: rawPhone } = req.body;
